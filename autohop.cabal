@@ -62,6 +62,8 @@ executable autohop
                        split,
                        process
 
+  ghc-options: -Wall -fwarn-tabs -funbox-strict-fields
+
   -- Directories containing source files.
   hs-source-dirs:      src
 
