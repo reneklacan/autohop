@@ -2,7 +2,8 @@
 import System.Environment (getArgs)
 import Data.List
 import Data.List.Split (splitOn)
-import Debug.Trace
+import System.Process
+import System.Exit
 
 ------------------------------------------------------------------------------
 
@@ -30,7 +31,19 @@ main = do
     args <- getArgs
     content <- readFile "/Users/rene/.cd_history"
     let query = args !! 0
-    print $ scoreAllPaths query $ loadAllPaths $ lines content
+    let paths = loadAndScoreAllPaths query content
+    cdPath $ getBestPath paths
+
+loadAndScoreAllPaths :: String -> String -> [ScoredPath]
+loadAndScoreAllPaths query content = scoreAllPaths query $ loadAllPaths $ lines content
+
+cdPath :: Maybe Path -> IO ()
+cdPath (Just path) = do
+    putStrLn $ pWhole path
+    exitSuccess
+cdPath Nothing = do
+    putStrLn "There's no path matching entered query"
+    exitFailure
 
 loadAllPaths :: [String] -> [Path]
 loadAllPaths lines = map loadPath $ frequency lines
@@ -61,3 +74,7 @@ getPathScore (q:query) (p:path)
 getPathScore [] _ = 10
 getPathScore _ [] = 0
 
+getBestPath :: [ScoredPath] -> Maybe Path
+getBestPath (sp:x)
+    | spScore sp > 0 = Just $ spPath sp
+    | otherwise      = Nothing
